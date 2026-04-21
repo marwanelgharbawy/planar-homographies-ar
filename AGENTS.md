@@ -87,6 +87,26 @@ plans/
 
 ---
 
+## ⚠️ Assignment Constraints (HARD RULES — NEVER VIOLATE)
+
+The following OpenCV built-ins are **banned** by the assignment. Any agent that introduces them will cause an automatic fail.
+
+| Banned function | Reason | Allowed alternative |
+|----------------|--------|---------------------|
+| `cv2.findHomography` | Built-in homography solver | `compute_homography_parameters` + `ransac_homography` |
+| `cv2.warpPerspective` | Built-in projective warp | `inverse_warp` (custom numpy) |
+| `cv2.getPerspectiveTransform` | Built-in H from 4 points | `compute_homography_parameters` on 4 pts |
+
+Custom implementations live in cell `6c2d2d58` (the warp-functions cell):
+- `forward_warp(src, H, output_shape)` — must remain even if unused in the pipeline
+- `inverse_warp(src, H, output_shape)` — used everywhere warping is needed
+- `ransac_homography(src_pts, dst_pts, n_iters, threshold)` — manual RANSAC, calls `compute_homography_parameters` internally
+- `is_valid_homography(H, frame_w, frame_h, w_book, h_book)` — geometry sanity check (convexity + area + bounds)
+
+**Audio**: The output video `data/ar_output.mp4` must include audio from `ar_source.mov`. Audio is muxed using `ffmpeg` (via `subprocess`) after the video writer closes — no Python audio library needed.
+
+---
+
 ## Coding Conventions
 
 - **Language**: Python 3, inside a Jupyter notebook.
